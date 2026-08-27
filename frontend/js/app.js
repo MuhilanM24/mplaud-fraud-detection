@@ -6,7 +6,7 @@ const TABS = {
 };
 
 function switchTab(name) {
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.side-nav .nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
   document.getElementById('tab-' + name).classList.remove('hidden');
   const mod = TABS[name];
@@ -14,7 +14,7 @@ function switchTab(name) {
   if (name === 'map' && Gis.map) setTimeout(() => Gis.map.invalidateSize(), 60);
 }
 
-document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+document.querySelectorAll('.side-nav .nav-item').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
 (async function boot() {
   const dateEl = document.getElementById('header-date');
