@@ -6,25 +6,13 @@ const About = {
     const meta = await API.get('/api/meta');
     const m = meta.meta, t = m.thresholds;
     el.innerHTML = `
-      <div class="note-banner" style="border-color:#e5484d66;background:#3a141c">
-        <b>Non-negotiable guardrail.</b> ${esc(meta.guardrail)}
-        The only statuses emitted are <b>"Flagged for investigation"</b> and <b>"Not flagged"</b>.
-      </div>
-
       <div class="grid cols-2">
-        <div class="card"><h3>Pipeline</h3>
-          <div class="mono" style="line-height:1.9">
-            MPLADS Data → Ingestion &amp; Validation → Feature Engineering →
-            Rule Engine + ML Engine (IsolationForest) + NLP Engine → Risk Fusion (0–100) →
-            Explainable AI → Alerts + Dashboard + GIS → Human Investigation → Feedback Loop
-          </div>
-        </div>
         <div class="card"><h3>What is validated vs. heuristic</h3>
           <div class="callout ok"><b>Validated against real findings:</b><br>${esc(m.provenance.assam_validated)}</div>
           <div class="callout warn"><b>General-purpose heuristics (NOT from the Assam case):</b><br>${esc(m.provenance.heuristics)}</div>
         </div>
 
-        <div class="card"><h3>Rule engine (deterministic, independent of ML)</h3>
+        <div class="card"><h3>Rule engine — deterministic, independent of ML</h3>
           <table>
             <tr><td>R1 — completion before payment</td><td>fires when completion at payment &lt; ${t.completion_before_payment_pct}% (MPLADS guideline)</td></tr>
             <tr><td>R2 — insufficient evidence</td><td>geo-tag match &lt; ${t.geo_match_min} AND site photos &lt; ${t.photos_min}</td></tr>

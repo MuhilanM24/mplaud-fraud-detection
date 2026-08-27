@@ -17,13 +17,16 @@ function switchTab(name) {
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
 
 (async function boot() {
+  const dateEl = document.getElementById('header-date');
+  if (dateEl) {
+    dateEl.textContent = new Date().toLocaleDateString('en-IN',
+      { day: '2-digit', month: 'short', year: 'numeric' });
+  }
   try {
-    await API.get('/api/health');
-    document.getElementById('system-health').innerHTML =
-      '<span class="dot"></span>API online · demo dataset loaded';
+    await API.get('/api/health');   // silent on success
   } catch {
-    document.getElementById('system-health').innerHTML =
-      '<span class="dot" style="background:var(--critical)"></span>API offline';
+    const el = document.getElementById('system-health');
+    if (el) el.innerHTML = '<span class="health-offline">● service offline</span>';
   }
   switchTab('dashboard');
 })();

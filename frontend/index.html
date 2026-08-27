@@ -11,14 +11,29 @@
 <div class="tricolor"></div>
 <header class="topbar">
   <div class="brand">
-    <div class="logo"> MPL </div>
+    <svg class="emblem" width="54" height="54" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="30" fill="#0d2b52" stroke="#d9c27a" stroke-width="2.5"/>
+      <circle cx="32" cy="32" r="24.5" fill="none" stroke="#d9c27a" stroke-width="1" opacity=".8"/>
+      <g stroke="#d9c27a" stroke-width="1.6">
+        <line x1="32" y1="9" x2="32" y2="55"/><line x1="9" y1="32" x2="55" y2="32"/>
+        <line x1="16" y1="16" x2="48" y2="48"/><line x1="48" y1="16" x2="16" y2="48"/>
+        <line x1="32" y1="9" x2="32" y2="55" transform="rotate(22.5 32 32)"/>
+        <line x1="32" y1="9" x2="32" y2="55" transform="rotate(67.5 32 32)"/>
+        <line x1="32" y1="9" x2="32" y2="55" transform="rotate(112.5 32 32)"/>
+        <line x1="32" y1="9" x2="32" y2="55" transform="rotate(157.5 32 32)"/>
+      </g>
+      <circle cx="32" cy="32" r="4.5" fill="#d9c27a"/>
+    </svg>
     <div>
       <h1>MPLADS Risk Intelligence &amp; Early Warning System</h1>
-      <p class="sub">Risk signals for human investigation &middot; never an automated fraud verdict<br>
-      <em>Demonstration prototype with synthetic / sample data — not an official Government portal</em></p>
+      <p class="sub-hindi">संसद सदस्य स्थानीय क्षेत्र विकास योजना — जोखिम आसंधि एवं पूर्व चेतावनी प्रणाली</p>
+      <p class="sub">Demonstration prototype with synthetic / sample data — not an official Government portal</p>
     </div>
   </div>
-  <div id="system-health" class="health"></div>
+  <div class="header-right">
+    <span class="date-chip" id="header-date"></span>
+    <div id="system-health"></div>
+  </div>
 </header>
 
 <nav class="tabs" id="tabs">
@@ -30,7 +45,7 @@
   <button data-tab="compliance">Compliance Monitor</button>
   <button data-tab="upload">Upload Your Data</button>
   <button data-tab="feedback">Feedback Log</button>
-  <button data-tab="about">Methods &amp; Guardrails</button>
+  <button data-tab="about">Methods</button>
 </nav>
 
 <main>

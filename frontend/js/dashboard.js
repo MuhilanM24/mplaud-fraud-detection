@@ -18,10 +18,6 @@ const Dashboard = {
           <div class="hint">leakage / structuring / delay / missing UC</div></div>
       </div>
 
-      <div class="note-banner">
-        <b>Guardrail:</b> ${esc(meta.guardrail)} Scores and flags route work to human investigators; they are not accusations.
-      </div>
-
       <div class="grid cols-2" style="margin-top:14px">
         <div class="card"><h3>Risk band distribution</h3><div id="ch-bands" class="chart"></div></div>
         <div class="card"><h3>Anomaly score vs completion-at-payment</h3><div id="ch-anom" class="chart"></div></div>
