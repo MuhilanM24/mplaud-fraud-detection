@@ -12,28 +12,46 @@ const fmtINR = (v) => {
 function bandChip(band) { return `<span class="band-chip band-${esc(band)}">${esc(band)}</span>`; }
 function scorePill(score, band) { return `<span class="score-pill score-${esc(band)}">${(+score).toFixed(1)}</span>`; }
 
-/* SVG semicircular risk gauge */
+/* SVG semicircular risk gauge — animated arc + count-up number */
 function riskGauge(score, band, size = 190) {
   const pct = Math.max(0, Math.min(100, +score || 0));
-  const colors = { Low: '#2fbf71', Moderate: '#e2b93b', High: '#ef8c3a', Critical: '#e5484d' };
-  const color = colors[band] || '#4f8cff';
-  const r = 70, cx = 100, cy = 90;
-  const arc = (from, to, c) => {
-    const a1 = Math.PI * (1 + from / 100), a2 = Math.PI * (1 + to / 100);
-    const x1 = cx + r * Math.cos(a1), y1 = cy - r * Math.sin(a1);
-    const x2 = cx + r * Math.cos(a2), y2 = cy - r * Math.sin(a2);
-    return `<path d="M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}" stroke="${c}" stroke-width="14" fill="none" stroke-linecap="round"/>`;
-  };
+  const colors = { Low: '#15803d', Moderate: '#a16207', High: '#c2410c', Critical: '#b91c1c' };
+  const color = colors[band] || '#1d4ed8';
+  const d = 'M 30 88 A 70 70 0 0 1 170 88';   // semicircle, left -> over the top -> right
   return `
-  <div>
-    <svg viewBox="0 0 200 110" width="${size}" height="${size * 0.58}">
-      ${arc(0, 100, '#d9e2ee')}
-      ${arc(0, pct, color)}
-      <text x="100" y="82" text-anchor="middle" font-size="34" font-weight="800" fill="#16233c">${(+score).toFixed(1)}</text>
-      <text x="100" y="100" text-anchor="middle" font-size="11" fill="${color}" letter-spacing="1.5">${esc(band ? band.toUpperCase() : '')}</text>
+  <div class="gauge">
+    <svg viewBox="0 0 200 112" width="${size}" height="${size * 0.56}" role="img" aria-label="risk ${pct} of 100">
+      <path d="${d}" stroke="#e9edf3" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <path class="gauge-arc" d="${d}" stroke="${color}" stroke-width="13" fill="none"
+            stroke-linecap="round" pathLength="100" data-pct="${pct}"
+            style="stroke-dasharray:0 100"/>
+      <text class="gauge-num" x="100" y="80" text-anchor="middle" data-target="${(+score) || 0}">0.0</text>
+      <text class="gauge-band" x="100" y="102" text-anchor="middle" fill="${color}">${esc(band || '')}</text>
     </svg>
-    <div class="gauge-label hint">Risk score 0–100 · routed to human review</div>
+    <div class="gauge-label">Risk score 0–100</div>
   </div>`;
+}
+
+/* Kick gauge animations inside a freshly rendered container (e.g. a modal). */
+function animateGauges(root) {
+  (root || document).querySelectorAll('.gauge-arc').forEach((el) => {
+    // double rAF so the browser paints the 0-state before transitioning
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.strokeDasharray = `${el.dataset.pct} 100`;
+    }));
+  });
+  (root || document).querySelectorAll('.gauge-num').forEach((el) => {
+    const target = parseFloat(el.dataset.target) || 0;
+    const t0 = performance.now(), dur = 1000;
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur);
+      const e = 1 - Math.pow(1 - k, 3);           // ease-out cubic
+      el.textContent = (target * e).toFixed(1);
+      if (k < 1) requestAnimationFrame(step);
+      else el.textContent = target.toFixed(1);
+    };
+    requestAnimationFrame(step);
+  });
 }
 
 /* Explainability factor bars (SHAP or deviation ranking) */
@@ -75,6 +93,7 @@ function modal(html) {
   root.querySelector('.modal-backdrop').addEventListener('click', (e) => {
     if (e.target === root.querySelector('.modal-backdrop')) closeModal();
   });
+  animateGauges(root);
   return root;
 }
 function closeModal() { document.getElementById('modal-root').innerHTML = ''; }
