@@ -35,29 +35,34 @@ a { color: var(--accent); }
 .app-shell { display: flex; min-height: calc(100vh - 3px); }
 
 .sidebar {
-  width: 240px; flex: 0 0 240px;
-  background: #ffffff; border-right: 1px solid var(--line);
+  width: 248px; flex: 0 0 248px;
+  background: #f4f6f9; border-right: 1px solid var(--line);
+  box-shadow: 1px 0 4px rgba(15, 23, 42, .05);
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
   display: flex; flex-direction: column; padding: 18px 12px 14px;
 }
 .side-brand {
   display: flex; gap: 11px; align-items: center;
-  padding: 2px 8px 16px; border-bottom: 1px solid var(--line2); margin-bottom: 12px;
+  padding: 2px 8px 16px; border-bottom: 1px solid var(--line); margin-bottom: 12px;
 }
 .side-title { font-size: 13.5px; font-weight: 800; color: #111827; line-height: 1.35; }
 .side-title span { display: block; color: var(--muted); font-weight: 600; font-size: 11.5px; }
 
-.side-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.side-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
 .nav-item {
   display: flex; align-items: center; gap: 11px; width: 100%;
-  padding: 9px 12px; border: none; background: transparent;
-  border-left: 3px solid transparent; border-radius: 0 7px 7px 0;
+  padding: 10px 12px; border: none; background: transparent;
+  border-left: 3px solid transparent; border-radius: 8px;
   color: var(--muted); font: 600 13px var(--sans); cursor: pointer; text-align: left;
-  transition: background .12s, color .12s;
+  transition: background .12s, color .12s, box-shadow .12s;
 }
 .nav-ico { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.nav-item:hover { background: var(--bg); color: var(--text); }
-.nav-item.active { background: #eef2fe; color: var(--accent); border-left-color: var(--accent); }
+.nav-item:hover { background: #e9edf3; color: var(--text); }
+.nav-item.active {
+  background: #ffffff; color: var(--accent);
+  border-left-color: var(--accent);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .12);
+}
 
 .side-foot { padding: 12px 8px 2px; border-top: 1px solid var(--line2); color: var(--muted); font-size: 11.5px; }
 .date-chip {
