@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MPLAUD — MPLADS Risk Intelligence &amp; Early Warning System</title>
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo"> MPL </div>
+    <div>
+      <h1>MPLAUD — MPLADS Risk Intelligence &amp; Early Warning System</h1>
+      <p class="sub">Risk signals for human investigation &middot; never an automated fraud verdict</p>
+    </div>
+  </div>
+  <div id="system-health" class="health"></div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="dashboard" class="active">Dashboard</button>
+  <button data-tab="alerts">Alert Center</button>
+  <button data-tab="map">GIS Risk Map</button>
+  <button data-tab="fundflow">Fund Flow</button>
+  <button data-tab="duplicates">Duplicate Works</button>
+  <button data-tab="compliance">Compliance Monitor</button>
+  <button data-tab="upload">Upload Your Data</button>
+  <button data-tab="feedback">Feedback Log</button>
+  <button data-tab="about">Methods &amp; Guardrails</button>
+</nav>
+
+<main>
+  <section id="tab-dashboard" class="tab-panel"></section>
+  <section id="tab-alerts" class="tab-panel hidden"></section>
+  <section id="tab-map" class="tab-panel hidden"><div id="map"></div></section>
+  <section id="tab-fundflow" class="tab-panel hidden"></section>
+  <section id="tab-duplicates" class="tab-panel hidden"></section>
+  <section id="tab-compliance" class="tab-panel hidden"></section>
+  <section id="tab-upload" class="tab-panel hidden"></section>
+  <section id="tab-feedback" class="tab-panel hidden"></section>
+  <section id="tab-about" class="tab-panel hidden"></section>
+</main>
+
+<div id="modal-root"></div>
+<footer class="footer">
+  <span>MPLAUD prototype &middot; synthetic demo data (seed 42) &middot; Assam-2023 pattern replication validated — see
+  <a href="VALIDATION_REPORT.md" target="_blank">VALIDATION_REPORT.md</a></span>
+</footer>
+
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/plotly.min.js"></script>
+<script src="js/api.js"></script>
+<script src="js/components.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/alerts.js"></script>
+<script src="js/gis.js"></script>
+<script src="js/fundflow.js"></script>
+<script src="js/duplicates.js"></script>
+<script src="js/compliance.js"></script>
+<script src="js/upload.js"></script>
+<script src="js/feedback.js"></script>
+<script src="js/about.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
