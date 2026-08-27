@@ -27,7 +27,7 @@ const Upload = {
       <div class="card">
         <h3>Projects CSV</h3>
         <div class="dropzone" id="drop-projects">
-          <div style="font-size:34px">⬆</div>
+          <div style="font-size:34px">&#11014;</div>
           <div><b>Drop your projects CSV here</b> or click to browse</div>
           <div class="hint" style="margin-top:6px">Required at minimum:
             <span class="mono">project_id</span>, <span class="mono">completion_pct_at_payment</span>,
@@ -37,10 +37,13 @@ const Upload = {
         </div>
         <input type="file" id="file-projects" accept=".csv" hidden>
       </div>
-      <div style="margin-top:12px">
-        <a class="btn secondary" style="text-decoration:none;display:inline-block;padding:8px 14px" href="/api/byod/template.csv">⬇ Download projects CSV template</a>
-        <a class="btn secondary" style="text-decoration:none;display:inline-block;padding:8px 14px" href="/api/byod/ledger_template.csv">⬇ Download ledger CSV template</a>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn ok" id="load-sample">&#128193; Load sample previous-year data (FY 2022-23, 45 works)</button>
+        <a class="btn secondary" style="text-decoration:none;display:inline-block;padding:8px 14px" href="/api/byod/template.csv">&#11015; Download projects CSV template</a>
+        <a class="btn secondary" style="text-decoration:none;display:inline-block;padding:8px 14px" href="/api/byod/ledger_template.csv">&#11015; Download ledger CSV template</a>
       </div>
+      <div class="hint" style="margin-top:8px">The sample dataset uses real-world-style messy column names (Work Code, Physical Achievement at Payment (%), …) so you can see the
+      auto-mapping in action. It contains <b>3 hidden high-risk works</b> and 2 borderline ones — see whether the system finds them.</div>
       <div id="byo-upload-status"></div>`;
   },
 
@@ -52,6 +55,17 @@ const Upload = {
     dz.ondragleave = () => dz.classList.remove('drag');
     dz.ondrop = (e) => { e.preventDefault(); dz.classList.remove('drag'); this.handleFile(e.dataTransfer.files[0]); };
     fi.onchange = () => this.handleFile(fi.files[0]);
+    const sampleBtn = document.getElementById('load-sample');
+    if (sampleBtn) sampleBtn.onclick = async () => {
+      const st = document.getElementById('byo-upload-status');
+      st.innerHTML = spinner('Fetching sample previous-year dataset');
+      try {
+        const blob = await fetch('/api/byod/sample_projects.csv').then(r => r.blob());
+        this.handleFile(new File([blob], 'MPLADS_FY2022-23_sample.csv', { type: 'text/csv' }));
+      } catch (e) {
+        st.innerHTML = callout('rule', 'Could not load sample', e.message);
+      }
+    };
   },
 
   setStep(n) {
@@ -171,9 +185,12 @@ const Upload = {
           </tr>`).join('')}
         </tbody></table></div>
       <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
-        <h3>4 · Optional: link a payment ledger (fund-flow analytics)</h3>
+        <h3>4 &middot; Optional: link a payment ledger (fund-flow analytics)</h3>
         <div class="hint" style="margin-bottom:8px">CSV with project_id, stage, date or day-offset, amount — gets its own mapping step.
           Enables leakage / structuring / stage-delay / missing-UC detection and re-scores every project.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
+          <button class="btn ok small" id="load-sample-ledger">&#128193; Load sample ledger (2 hidden money-trail patterns)</button>
+        </div>
         <div class="dropzone" id="drop-ledger" style="padding:18px"><b>Drop ledger CSV</b> or click to browse
           <input type="file" id="file-ledger" accept=".csv" hidden></div>
         <div id="ledger-status"></div>
@@ -184,6 +201,16 @@ const Upload = {
     dz.ondragleave = () => dz.classList.remove('drag');
     dz.ondrop = (e) => { e.preventDefault(); this.handleLedger(e.dataTransfer.files[0]); };
     fi.onchange = () => this.handleLedger(fi.files[0]);
+    card.querySelector('#load-sample-ledger').onclick = async () => {
+      const st = document.getElementById('ledger-status');
+      st.innerHTML = spinner('Fetching sample ledger');
+      try {
+        const blob = await fetch('/api/byod/sample_ledger.csv').then(r => r.blob());
+        this.handleLedger(new File([blob], 'MPLADS_FY2022-23_sample_ledger.csv', { type: 'text/csv' }));
+      } catch (e) {
+        st.innerHTML = callout('rule', 'Could not load sample ledger', e.message);
+      }
+    };
   },
 
   async handleLedger(file) {

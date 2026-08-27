@@ -63,8 +63,13 @@ const Alerts = {
     const box = document.getElementById('alerts-table');
     box.innerHTML = spinner('Scoring projects');
     const st = this.state;
-    const q = new URLSearchParams({ band: st.band, district: st.district, agency: st.agency,
-      flagged: st.flagged, search: st.search, rule: st.rule, fund_flow_flag: st.fff, sort: st.sort, limit: 0 });
+    const q = new URLSearchParams();
+    for (const [k, v] of Object.entries({ band: st.band, district: st.district,
+      agency: st.agency, flagged: st.flagged, search: st.search, rule: st.rule,
+      fund_flow_flag: st.fff, sort: st.sort })) {
+      if (v !== '' && v != null) q.set(k, v);
+    }
+    q.set('limit', '0');
     const data = await API.get('/api/projects?' + q);
     this._rows = data.projects;
     const pages = Math.max(1, Math.ceil(data.total / st.perPage));

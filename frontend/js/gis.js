@@ -5,13 +5,13 @@ const Gis = {
     const el = document.getElementById('map');
     if (!this.map) {
       this.map = L.map('map').setView([26.4, 92.9], 7); // Assam
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 18,
       }).addTo(this.map);
       this.layer = L.layerGroup().addTo(this.map);
     }
     const data = await API.get('/api/map/projects');
-    const colors = { Low: '#2fbf71', Moderate: '#e2b93b', High: '#ef8c3a', Critical: '#e5484d' };
+    const colors = { Low: '#1e7d3c', Moderate: '#9a6c00', High: '#b85c08', Critical: '#b02330' };
     this.layer.clearLayers();
     for (const p of data.projects) {
       if (p.lat == null || p.lon == null) continue;
@@ -23,16 +23,16 @@ const Gis = {
         <b>${esc(p.project_id)}</b> ${bandChip(p.band)}<br>
         ${esc(p.desc || '')}<br>
         Risk score <b>${p.risk}</b> · ${esc(p.district || '')}<br>
-        <a href="#" onclick="Alerts.drilldown('${esc(p.project_id)}');closeModal();return false;" style="color:#7fb0ff">Open drill-down →</a>`);
+        <a href="#" onclick="Alerts.drilldown('${esc(p.project_id)}');closeModal();return false;" style="color:#16468c">Open drill-down →</a>`);
     }
     if (!this._legend) {
       this._legend = L.control({ position: 'bottomright' });
       this._legend.onAdd = () => {
         const d = L.DomUtil.create('div');
-        d.style.cssText = 'background:#14203aee;padding:10px 12px;border-radius:10px;color:#e6edf7;font-size:12px;border:1px solid #24365c';
+        d.style.cssText = 'background:#ffffffee;padding:10px 12px;border-radius:6px;color:#1b2a44;font-size:12px;border:1px solid #c5d0e0;box-shadow:0 1px 4px rgba(20,40,80,.15)';
         d.innerHTML = '<b>Risk band</b><br>' + Object.entries(colors).map(([b, c]) =>
           `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c};margin-right:6px"></span>${b}`).join('<br>') +
-          '<br><span style="color:#93a5c4">circle size = risk score</span>';
+          '<br><span style="color:#4e5f7d">circle size = risk score</span>';
         return d;
       };
       this._legend.addTo(this.map);

@@ -114,8 +114,10 @@ ML anomaly component, yet are flagged purely through structured/parked/leaked/UC
 
 Upload your own project CSV in the **Upload Your Data** tab:
 
-1. CSV upload with auto-guessed **column mapping** (fuzzy header matching) — confirm or override
-   every mapping; sensible defaults for missing optional fields with visible reduced-confidence notes;
+1. CSV upload with auto-guessed **column mapping** (fuzzy header matching, with a
+   date-column guard so date fields never snap to numeric fields) — confirm or
+   override every mapping; sensible defaults for missing optional fields with
+   visible reduced-confidence notes;
 2. The same rule engine + IsolationForest + risk fusion runs server-side via the API;
 3. Results render in the same Alert-Center-style UI with an explicit **Flagged / Not Flagged**
    status and plain-language reason list per project;
@@ -124,6 +126,16 @@ Upload your own project CSV in the **Upload Your Data** tab:
 5. Optional second upload — a **payment ledger CSV** (project_id, stage, date/day-offset, amount)
    with its own mapping step — activates fund-flow analytics and re-scores every project;
 6. Downloadable CSV templates for both files (buttons in the tab).
+
+**No file of your own?** The tab includes **"Load sample previous-year data"** — a realistic
+FY 2022-23 sample CSV (45 works, messy real-world-style headers like *Work Code*, *Physical
+Achievement at Payment (%)*, *Photographs of Site Uploaded*) with **3 hidden high-risk works** and
+2 borderline ones, so you can watch the auto-mapping and detection end-to-end. A matching
+**sample payment ledger** (1 healthy chain + 1 structured-split pattern + 1 missing-UC pattern on
+otherwise clean projects) demonstrates the fund-flow tracker on uploaded data.
+
+The UI follows a simple, light government-portal style (tricolor strip, navy header, plain
+tables). It is clearly labelled a **demonstration prototype — not an official Government portal**.
 
 Required-at-minimum: `project_id`, `completion_pct_at_payment`, `geo_tag_match_score`,
 `site_photos_uploaded`. Optional: `sanctioned_amount`, `days_sanction_to_payment`,

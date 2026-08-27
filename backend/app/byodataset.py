@@ -20,6 +20,7 @@ import difflib
 import io
 import json
 import os
+import random
 import re
 import uuid
 from datetime import date, datetime
@@ -142,10 +143,15 @@ def propose_mapping(headers: list[str], fields: dict[str, list[str]]) -> dict:
             for h, nh in normed.items():
                 if h in used_headers:
                     continue
-                ratio = max(difflib.SequenceMatcher(None, nh, syn).ratio()
-                            for syn in synonyms)
-                if ratio >= 0.62 and (best is None or ratio > best[1]):
-                    best = (h, ratio, f"fuzzy match ({ratio:.0%})")
+                for syn in synonyms:
+                    ratio = difflib.SequenceMatcher(None, nh, syn).ratio()
+                    # date-ness guard: a date column should never fuzzy-match a
+                    # numeric/days field (or vice versa) unless near-identical
+                    date_mismatch = ("date" in nh) != ("date" in syn)
+                    if date_mismatch and ratio < 0.90:
+                        continue
+                    if ratio >= 0.62 and (best is None or ratio > best[1]):
+                        best = (h, ratio, f"fuzzy match ({ratio:.0%})")
         if best:
             proposal[field] = {"column": best[0], "confidence": round(best[1], 2),
                                "method": best[2], "required": field in REQUIRED_FIELDS}
@@ -396,3 +402,114 @@ def ledger_template_csv() -> str:
                             ("UTILIZATION_CERTIFICATE", 150, 2480000)]:
         lines.append(f"{d[0]},{stage},,{off},{amt},")
     return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------
+# Sample "previous year" datasets: realistic messy-header CSVs a district
+# office might export, with a few hidden dirty patterns, so users can try the
+# bring-your-own flow without preparing a file. Deterministic (seed 7).
+# ---------------------------------------------------------------------------
+_SAMPLE_DISTRICTS = {"Goalpara": (26.16, 90.62), "Bongaigaon": (26.48, 90.55),
+                     "Morigaon": (26.25, 92.35)}
+_SAMPLE_AGENCIES = ["DRDA Goalpara", "Bongaigaon PWD Division",
+                    "Morigaon Zilla Parishad", "M/s Rhino Builders (Goalpara)",
+                    "Rural Works Circle Bongaigaon"]
+_SAMPLE_WORKS = [
+    "Construction of CC road from {v} to {v2}",
+    "Widening of village road at {v}",
+    "Construction of school building at {v}",
+    "Installation of solar street lights at {v}",
+    "Construction of deep tube well at {v}",
+    "Construction of RCC drain along {v} road",
+    "Construction of anganwadi centre at {v}",
+]
+_SAMPLE_VILLAGES = ["Joleswar", "Lakhipur", "Srijangram", "Bidyapur", "Abhayapuri",
+                    "Bhabanipur", "Mayong", "Jagiroad", "Khetri", "Hahim",
+                    "Rangjuli", "Tukreswari", "Nelaji", "Barpeta Road", "Dhubri Road"]
+
+
+def sample_projects_csv() -> str:
+    rng = random.Random(7)
+    cols = ["Work Code", "Name of the Work", "District Name", "MP Name",
+            "Implementing Agency", "Type of Work", "Sanctioned Amount (Rs)",
+            "Date of Sanction", "Date of Final Payment",
+            "Physical Achievement at Payment (%)", "Geo-tag Matching Score",
+            "Photographs of Site Uploaded", "Unit Cost Ratio",
+            "Agency Prior Flags", "Latitude", "Longitude"]
+    rows = []
+    for i in range(1, 46):
+        pid = f"FY22-{i:04d}"
+        dist = rng.choice(list(_SAMPLE_DISTRICTS))
+        lat, lon = _SAMPLE_DISTRICTS[dist]
+        wtype = rng.choice(["Road", "Building", "Water", "Sanitation", "Electrification"])
+        desc = rng.choice(_SAMPLE_WORKS).format(v=rng.choice(_SAMPLE_VILLAGES),
+                                                v2=rng.choice(_SAMPLE_VILLAGES))
+        amount = round(rng.uniform(8, 45) * 100000, -3)
+        sday = rng.randint(1, 330)
+        sdate = (date(2022, 1, 1).toordinal() + sday)
+        sdate_d = date.fromordinal(sdate)
+        pdate_d = date.fromordinal(sdate + rng.randint(110, 380))
+        if i in (41, 42, 43):        # hidden Assam-style pattern
+            comp = round(rng.uniform(1.5, 9.0), 1)
+            geo = round(rng.uniform(0.08, 0.30), 2)
+            photos = 0
+            cpu = round(rng.uniform(1.9, 2.6), 2)
+            agency = "M/s Rhino Builders (Goalpara)"
+            prior = rng.randint(4, 5)
+            pdate_d = date.fromordinal(sdate + rng.randint(18, 40))
+            amount = round(rng.uniform(9, 17) * 100000, -3)
+        elif i in (44, 45):          # borderline breaches
+            comp = round(rng.uniform(58, 70), 1)
+            geo = round(rng.uniform(0.6, 0.9), 2)
+            photos = rng.randint(2, 9)
+            cpu = round(rng.uniform(0.9, 1.2), 2)
+            agency = rng.choice(_SAMPLE_AGENCIES[:3])
+            prior = 0
+        else:
+            comp = round(rng.uniform(78, 100), 1)
+            thin = rng.random() < 0.12
+            geo = round(rng.uniform(0.15, 0.4) if thin else
+                        rng.uniform(0.62, 0.98), 2)
+            photos = rng.randint(0, 1) if thin else rng.randint(4, 30)
+            cpu = round(rng.uniform(0.8, 1.25), 2)
+            agency = rng.choice(_SAMPLE_AGENCIES)
+            prior = 1 if agency == "M/s Rhino Builders (Goalpara)" else 0
+        rows.append([
+            pid, f'"{desc}"', dist, f"Sample MP-{rng.randint(1, 4)} (RS)",
+            agency, wtype, int(amount), sdate_d.isoformat(), pdate_d.isoformat(),
+            comp, geo, photos, cpu, prior,
+            round(lat + rng.uniform(-0.22, 0.22), 5), round(lon + rng.uniform(-0.22, 0.22), 5)])
+    return ",".join(cols) + "\n" + "\n".join(",".join(map(str, r)) for r in rows) + "\n"
+
+
+def sample_ledger_csv() -> str:
+    """Ledger for 3 sample projects: one healthy chain, one structured-split
+    pattern (project looks clean), one vendor-paid-never-UC'd."""
+    rows = [("Work Code", "Stage of Fund Flow", "Days From Sanction", "Amount (Rs)", "Remarks")]
+
+    def chain(pid, sanc, gaps=(18, 22, 45, 60), shrink=0.997):
+        amts = [sanc]
+        day = 0
+        for k, stage in enumerate(["SANCTION", "DISTRICT_RELEASE", "AGENCY_RELEASE",
+                                   "VENDOR_PAYMENT", "UTILIZATION_CERTIFICATE"]):
+            day = 0 if k == 0 else day + gaps[k - 1]
+            amt = sanc if k == 0 else round(amts[-1] * shrink)
+            rows.append((pid, stage, day, amt, ""))
+        return day
+
+    chain("FY22-0007", 2450000)                                   # healthy
+    # FY22-0012: clean project, structured vendor payments just under Rs 5 lakh
+    sanc = 14700000 // 10                                          # 14.7 lakh
+    rows.append(("FY22-0012", "SANCTION", 0, 1470000, ""))
+    rows.append(("FY22-0012", "DISTRICT_RELEASE", 25, 1468000, ""))
+    rows.append(("FY22-0012", "AGENCY_RELEASE", 48, 1462000, ""))
+    for j, off in enumerate([70, 73, 76]):
+        rows.append(("FY22-0012", "VENDOR_PAYMENT", off, 483000 + j * 6000,
+                     f"part payment {j+1}/3"))
+    rows.append(("FY22-0012", "UTILIZATION_CERTIFICATE", 140, 1461000, ""))
+    # FY22-0021: vendor paid on day 500, NO utilization certificate ever
+    rows.append(("FY22-0021", "SANCTION", 0, 2100000, ""))
+    rows.append(("FY22-0021", "DISTRICT_RELEASE", 20, 2094000, ""))
+    rows.append(("FY22-0021", "AGENCY_RELEASE", 41, 2088000, ""))
+    rows.append(("FY22-0021", "VENDOR_PAYMENT", 500, 2080000, ""))
+    return "\n".join(",".join(map(str, r)) for r in rows) + "\n"

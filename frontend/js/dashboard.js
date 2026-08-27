@@ -46,7 +46,7 @@ const Dashboard = {
       x: bands, y: bands.map(b => s.band_counts[b] || 0), type: 'bar',
       marker: { color: bands.map(b => colors[b]) },
       text: bands.map(b => s.band_counts[b] || 0), textposition: 'outside',
-    }], { margin: { t: 10, b: 40, l: 40, r: 10 }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#93a5c4' } }, { displayModeBar: false });
+    }], { margin: { t: 10, b: 40, l: 40, r: 10 }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#44536b' } }, { displayModeBar: false });
 
     // anomaly scatter
     const projs = await API.get('/api/projects?limit=0');
@@ -60,7 +60,7 @@ const Dashboard = {
       marker: { size: 8, color: rows.map(p => colors[p.band]), opacity: .8 },
     }], {
       margin: { t: 10, b: 45, l: 45, r: 10 }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-      font: { color: '#93a5c4' }, xaxis: { title: 'Physical completion % at payment', range: [-3, 103] },
+      font: { color: '#44536b' }, xaxis: { title: 'Physical completion % at payment', range: [-3, 103] },
       yaxis: { title: 'ML anomaly percentile' }, showlegend: false,
       shapes: [{ type: 'line', x0: 75, x1: 75, y0: 0, y1: 100,
                  line: { color: '#e5484d', dash: 'dot', width: 1.5 } }],
@@ -75,7 +75,7 @@ const Dashboard = {
       text: ags.map(a => `${a.agency_risk_score} · ${a.n_projects} projects`).reverse(), textposition: 'auto',
     }], {
       margin: { t: 10, b: 30, l: 260, r: 20 }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-      font: { color: '#93a5c4', size: 11 }, height: 320,
+      font: { color: '#44536b', size: 11 }, height: 320,
     }, { displayModeBar: false });
   },
 };

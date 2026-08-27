@@ -20,7 +20,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import config, db
-from .byodataset import (ByoDataset, ledger_template_csv, template_csv)
+from .byodataset import (ByoDataset, ledger_template_csv, sample_ledger_csv,
+                         sample_projects_csv, template_csv)
 from .data_generator import generate
 from .pipeline import run_pipeline
 
@@ -130,18 +131,26 @@ def _filtered_projects(demo: dict, band: str | None, district: str | None,
 
 @app.get("/api/projects")
 def projects(band: str | None = None, district: str | None = None,
-             agency: str | None = None, flagged: bool | None = None,
+             agency: str | None = None, flagged: str | None = None,
              search: str | None = None, rule: str | None = None,
              fund_flow_flag: str | None = None, sort: str = "risk_desc",
-             limit: int = 0) -> dict:
+             limit: str | None = None) -> dict:
     demo = _load_demo()
-    rows = _filtered_projects(demo, band, district, agency, flagged, search,
-                              rule, fund_flow_flag)
+    flagged_b = None
+    if flagged is not None and flagged != "":
+        flagged_b = str(flagged).strip().lower() in ("1", "true", "yes", "y")
+    try:
+        limit_i = int(limit) if limit not in (None, "") else 0
+    except ValueError:
+        limit_i = 0
+    rows = _filtered_projects(demo, band or None, district or None,
+                              agency or None, flagged_b, search or None,
+                              rule or None, fund_flow_flag or None)
     rows.sort(key=lambda r: r["risk_score"],
               reverse=(sort != "risk_asc"))
     total = len(rows)
-    if limit:
-        rows = rows[:limit]
+    if limit_i:
+        rows = rows[:limit_i]
     return {"total": total, "projects": rows}
 
 
@@ -278,6 +287,27 @@ def byod_ledger_template() -> StreamingResponse:
                              media_type="text/csv",
                              headers={"Content-Disposition":
                                       "attachment; filename=mplaud_ledger_template.csv"})
+
+
+@app.get("/api/byod/sample_projects.csv")
+def byod_sample_projects() -> StreamingResponse:
+    """Sample 'previous year' (FY 2022-23) dataset with realistic messy
+    headers and a few hidden dirty patterns — for trying BYO mode without a
+    file of your own."""
+    return StreamingResponse(iter([sample_projects_csv()]),
+                             media_type="text/csv",
+                             headers={"Content-Disposition":
+                                      "attachment; filename=MPLADS_FY2022-23_sample.csv"})
+
+
+@app.get("/api/byod/sample_ledger.csv")
+def byod_sample_ledger() -> StreamingResponse:
+    """Sample payment ledger: 1 healthy chain + 1 structured-split pattern +
+    1 missing-UC pattern linked to the sample projects."""
+    return StreamingResponse(iter([sample_ledger_csv()]),
+                             media_type="text/csv",
+                             headers={"Content-Disposition":
+                                      "attachment; filename=MPLADS_FY2022-23_sample_ledger.csv"})
 
 
 # --------------------------------------------------------------------------

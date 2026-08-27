@@ -27,9 +27,9 @@ function riskGauge(score, band, size = 190) {
   return `
   <div>
     <svg viewBox="0 0 200 110" width="${size}" height="${size * 0.58}">
-      ${arc(0, 100, '#1c2b4d')}
+      ${arc(0, 100, '#d9e2ee')}
       ${arc(0, pct, color)}
-      <text x="100" y="82" text-anchor="middle" font-size="34" font-weight="800" fill="#fff">${(+score).toFixed(1)}</text>
+      <text x="100" y="82" text-anchor="middle" font-size="34" font-weight="800" fill="#16233c">${(+score).toFixed(1)}</text>
       <text x="100" y="100" text-anchor="middle" font-size="11" fill="${color}" letter-spacing="1.5">${esc(band ? band.toUpperCase() : '')}</text>
     </svg>
     <div class="gauge-label hint">Risk score 0–100 · routed to human review</div>
@@ -52,7 +52,7 @@ function factorBars(factors) {
       </div>
       <div class="bar-bg">
         <div class="bar ${up ? 'up' : 'down'}" style="${up ? 'left:50%' : 'right:50%'}; width:${w}%"></div>
-        <div style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#ffffff22"></div>
+        <div style="position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:rgba(0,0,0,.18)"></div>
       </div>
       <div class="${up ? 'dir-up' : 'dir-down'}">${up ? '▲ raises' : '▼ lowers'}<div class="hint mono">${f.shap_value != null ? f.shap_value.toFixed(2) : 'z=' + f.z_score} · value ${f.feature_value ?? '—'}</div></div>
     </div>`;
