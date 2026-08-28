@@ -1,4 +1,4 @@
-# Core backend
+# Core backend (also used by Vercel — keep serverless-friendly: no torch here)
 fastapi>=0.110
 uvicorn[standard]>=0.29
 sqlalchemy>=2.0
@@ -11,13 +11,3 @@ pandas>=2.2
 scikit-learn>=1.4
 scipy>=1.12
 shap>=0.45
-xgboost>=2.0
-
-# Optional: real sentence embeddings for duplicate detection.
-# The app falls back to an offline TF-IDF similarity backend when this or the
-# model is unavailable, and labels the active backend in the UI/API.
-sentence-transformers>=2.7 ; python_version >= "3.9"
-
-# DB drivers (optional — SQLite needs none)
-psycopg2-binary>=2.9 ; extra == "postgres"
-pymysql>=1.1 ; extra == "mysql"
