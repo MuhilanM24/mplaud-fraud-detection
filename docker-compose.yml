@@ -1,0 +1,42 @@
+services:
+  mplaud:
+    build:
+      context: .
+      # build with --build-arg BAKE_SBERT=1 to embed the sentence-transformers
+      # model for real sentence-embedding duplicate detection
+      args:
+        BAKE_SBERT: "0"
+    ports:
+      - "8000:8000"
+    environment:
+      # Any threshold can be tuned via env vars (see backend/app/config.py)
+      MPLAUD_RULE_COMPLETION_MIN_PCT: "75"
+      MPLAUD_STAGE_DELAY_DAYS: "200"
+      MPLAUD_STRUCTURING_THRESHOLD: "500000"
+      # PostgreSQL profile: `docker compose --profile postgres up`
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/mplaud.db}
+    volumes:
+      - mplaud-data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false
+
+  db:
+    image: postgres:16-alpine
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: mplaud
+      POSTGRES_PASSWORD: mplaud
+      POSTGRES_DB: mplaud
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mplaud"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mplaud-data:
+  pg-data:

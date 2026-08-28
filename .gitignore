@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Runtime data & secrets
+backend/data/
+data/
+*.db
+.env
+
+# Model caches
+.cache/
+
+# OS / editor
+.DS_Store
