@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "backend/app/main.py": { "maxDuration": 60, "memory": 1024 }
+  },
+  "env": {
+    "MPLAUD_DATA_DIR": "/tmp",
+    "MPLAUD_NLP_BACKEND": "tfidf",
+    "DATABASE_URL": "sqlite:////tmp/mplaud.db"
+  }
+}
